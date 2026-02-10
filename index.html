@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sfida delle Tabelline!</title>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --success: #4CAF50;
+            --error: #FF5252;
+            --bg: #F8FAFC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #score { color: var(--success); }
+        #high-score { color: #E67E22; }
+
+        .math-row {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            min-height: 5rem;
+        }
+
+        .answer-slot {
+            color: #2C3E50;
+            border-bottom: 5px solid #CBD5E1;
+            min-width: 80px;
+            height: 4.5rem;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 18px;
+            font-size: 1.6rem;
+            border: none;
+            border-radius: 15px;
+            background: #F1F5F9;
+            color: #475569;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #CBD5E1;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #CBD5E1;
+        }
+
+        .btn-check {
+            grid-column: span 2;
+            background: var(--success);
+            color: white;
+            box-shadow: 0 4px 0 #2E7D32;
+        }
+
+        .btn-clear {
+            background: var(--error);
+            color: white;
+            box-shadow: 0 4px 0 #C62828;
+        }
+
+        .feedback {
+            font-size: 1.4rem;
+            font-weight: bold;
+            height: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .correct { animation: pulse 0.4s ease; color: var(--success); }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="stats">
+            <div>Punti: <span id="score">0</span></div>
+            <div>Record: <span id="high-score">0</span></div>
+        </div>
+
+        <div id="feedback" class="feedback">Inizia la sfida!</div>
+
+        <div class="math-row">
+            <span id="question"></span>
+            <span>=</span>
+            <span id="answer-slot" class="answer-slot"></span>
+        </div>
+
+        <div class="keypad">
+            <button onclick="addNumber(1)">1</button>
+            <button onclick="addNumber(2)">2</button>
+            <button onclick="addNumber(3)">3</button>
+            <button onclick="addNumber(4)">4</button>
+            <button onclick="addNumber(5)">5</button>
+            <button onclick="addNumber(6)">6</button>
+            <button onclick="addNumber(7)">7</button>
+            <button onclick="addNumber(8)">8</button>
+            <button onclick="addNumber(9)">9</button>
+            <button class="btn-clear" onclick="clearAnswer()">C</button>
+            <button onclick="addNumber(0)">0</button>
+            <button class="btn-check" onclick="checkAnswer()">OK!</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScore = 0;
+        let highScore = localStorage.getItem('tabellineHighScore') || 0;
+        let num1, num2, correctAnswer;
+        let userAnswer = "";
+        let canAnswer = true;
+
+        const scoreEl = document.getElementById('score');
+        const highScoreEl = document.getElementById('high-score');
+        const questionEl = document.getElementById('question');
+        const answerSlotEl = document.getElementById('answer-slot');
+        const feedbackEl = document.getElementById('feedback');
+
+        highScoreEl.innerText = highScore;
+
+        function generateQuestion() {
+            num1 = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = num1 * num2;
+            
+            questionEl.innerText = `${num1} × ${num2}`;
+            userAnswer = "";
+            answerSlotEl.innerText = "";
+            answerSlotEl.style.color = "#2C3E50";
+            feedbackEl.innerText = "Tocca a te!";
+            feedbackEl.className = "feedback";
+            canAnswer = true;
+        }
+
+        function addNumber(num) {
+            if (!canAnswer) return;
+            if (userAnswer.length < 3) {
+                userAnswer += num;
+                answerSlotEl.innerText = userAnswer;
+            }
+        }
+
+        function clearAnswer() {
+            if (!canAnswer) return;
+            userAnswer = "";
+            answerSlotEl.innerText = "";
+        }
+
+        function checkAnswer() {
+            if (userAnswer === "" || !canAnswer) return;
+            canAnswer = false;
+
+            if (parseInt(userAnswer) === correctAnswer) {
+                currentScore += 10;
+                feedbackEl.innerText = "Ottimo! 🌟";
+                answerSlotEl.style.color = "var(--success)";
+                feedbackEl.classList.add("correct");
+                
+                if (currentScore > highScore) {
+                    highScore = currentScore;
+                    localStorage.setItem('tabellineHighScore', highScore);
+                    highScoreEl.innerText = highScore;
+                }
+            } else {
+                currentScore = 0;
+                feedbackEl.innerText = `Ops! Era ${correctAnswer}`;
+                answerSlotEl.innerText = correctAnswer;
+                answerSlotEl.style.color = "var(--error)";
+            }
+
+            scoreEl.innerText = currentScore;
+            
+            setTimeout(generateQuestion, 1800);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= 0 && e.key <= 9) addNumber(e.key);
+            if (e.key === "Enter") checkAnswer();
+            if (e.key === "Backspace") clearAnswer();
+        });
+
+        // Avvio immediato della prima domanda reale
+        generateQuestion();
+    </script>
+</body>
+</html>
