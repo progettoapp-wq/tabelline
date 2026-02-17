@@ -3,245 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sfida delle Tabelline!</title>
+    <title>Tabelline Stellari</title>
     
     <link rel="apple-touch-icon" href="icona.png">
     <link rel="icon" type="image/png" href="icona.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tabelline">
 
     <style>
         :root {
             --primary: #4A90E2;
             --success: #4CAF50;
             --error: #FF5252;
-            --bg: #F8FAFC;
+            --warning: #FFD700;
+            --bg: #1A1A2E; /* Sfondo scuro spaziale */
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg);
+            color: white;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
-            touch-action: manipulation; /* Migliora il tocco su mobile */
         }
 
-        .game-container {
-            background: white;
+        .container {
+            background: #16213E;
             padding: 2rem;
             border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             text-align: center;
             width: 90%;
             max-width: 450px;
         }
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
+        /* --- MENU --- */
+        #menu { display: block; }
+        .menu-title { font-size: 2rem; margin-bottom: 20px; color: var(--warning); }
+        .level-card {
+            background: #0F3460;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .level-card:hover { border-color: var(--primary); background: #1a4a80; }
+        .level-card h3 { margin: 0; color: var(--primary); }
+        .level-card p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
+        .record-tag { font-size: 0.8rem; font-weight: bold; color: var(--warning); display: block; margin-top: 5px; }
+
+        /* --- GIOCO --- */
+        #game { display: none; }
+        .stats { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; }
+        
+        .timer-container {
+            width: 100%;
+            height: 10px;
+            background: #0F3460;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: none; /* Attivo solo in Master */
+        }
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--warning);
+            transition: width 0.1s linear;
         }
 
-        #score { color: var(--success); }
-        #high-score { color: #E67E22; }
-
         .math-row {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             font-weight: bold;
-            color: var(--primary);
-            margin: 25px 0;
+            margin: 20px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
-            min-height: 5rem;
         }
-
         .answer-slot {
-            color: #2C3E50;
-            border-bottom: 5px solid #CBD5E1;
-            min-width: 90px;
-            height: 4.5rem;
-            display: inline-block;
-            text-align: center;
+            border-bottom: 5px solid var(--primary);
+            min-width: 80px;
+            min-height: 4rem;
         }
 
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 10px;
-        }
-
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         button {
-            padding: 20px;
-            font-size: 1.6rem;
-            border: none;
-            border-radius: 15px;
-            background: #F1F5F9;
-            color: #475569;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #CBD5E1;
-            transition: all 0.05s;
-            -webkit-tap-highlight-color: transparent;
+            padding: 18px; font-size: 1.5rem; border: none; border-radius: 12px;
+            background: #E94560; color: white; cursor: pointer;
+            box-shadow: 0 4px 0 #9d2e41; transition: 0.1s;
         }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #9d2e41; }
+        .btn-check { grid-column: span 2; background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
+        .btn-check:active { box-shadow: 0 2px 0 #2E7D32; }
+        .btn-back { background: #533483; margin-top: 20px; width: 100%; padding: 10px; font-size: 1rem; }
 
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #CBD5E1;
-        }
-
-        .btn-check {
-            grid-column: span 2;
-            background: var(--success);
-            color: white;
-            box-shadow: 0 4px 0 #2E7D32;
-        }
-
-        .btn-clear {
-            background: var(--error);
-            color: white;
-            box-shadow: 0 4px 0 #C62828;
-        }
-
-        .feedback {
-            font-size: 1.4rem;
-            font-weight: bold;
-            height: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .correct { animation: pulse 0.4s ease; color: var(--success); }
-        .wrong { color: var(--error); }
+        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <div class="stats">
-            <div>Punti: <span id="score">0</span></div>
-            <div>Record: <span id="high-score">0</span></div>
+    <div class="container">
+        <div id="menu">
+            <h1 class="menu-title">🚀 Tabelline Stellari</h1>
+            
+            <div class="level-card" onclick="startGame('base')">
+                <h3>Livello 1: BASE</h3>
+                <p>Nessun limite, nessun errore.</p>
+                <span class="record-tag">Record: <span id="record-base">0</span></span>
+            </div>
+
+            <div class="level-card" onclick="startGame('pro')">
+                <h3>Livello 2: PRO</h3>
+                <p>Sbagli? Perdi 10 punti!</p>
+                <span class="record-tag">Record: <span id="record-pro">0</span></span>
+            </div>
+
+            <div class="level-card" onclick="startGame('master')">
+                <h3>Livello 3: MASTER</h3>
+                <p>10 secondi e penalità errori!</p>
+                <span class="record-tag">Record: <span id="record-master">0</span></span>
+            </div>
         </div>
 
-        <div id="feedback" class="feedback">Pronto?</div>
+        <div id="game">
+            <div class="stats">
+                <div>Punti: <span id="current-score">0</span></div>
+                <div id="game-level-name" style="color:var(--warning)">BASE</div>
+            </div>
 
-        <div class="math-row">
-            <span id="question"></span>
-            <span>=</span>
-            <span id="answer-slot" class="answer-slot"></span>
-        </div>
+            <div class="timer-container" id="timer-box">
+                <div id="timer-bar"></div>
+            </div>
 
-        <div class="keypad">
-            <button onclick="addNumber(1)">1</button>
-            <button onclick="addNumber(2)">2</button>
-            <button onclick="addNumber(3)">3</button>
-            <button onclick="addNumber(4)">4</button>
-            <button onclick="addNumber(5)">5</button>
-            <button onclick="addNumber(6)">6</button>
-            <button onclick="addNumber(7)">7</button>
-            <button onclick="addNumber(8)">8</button>
-            <button onclick="addNumber(9)">9</button>
-            <button class="btn-clear" onclick="clearAnswer()">C</button>
-            <button onclick="addNumber(0)">0</button>
-            <button class="btn-check" onclick="checkAnswer()">OK!</button>
+            <div id="feedback" class="feedback"></div>
+
+            <div class="math-row">
+                <span id="question"></span>
+                <span>=</span>
+                <span id="answer-slot" class="answer-slot"></span>
+            </div>
+
+            <div class="keypad">
+                <button onclick="addNumber(1)">1</button>
+                <button onclick="addNumber(2)">2</button>
+                <button onclick="addNumber(3)">3</button>
+                <button onclick="addNumber(4)">4</button>
+                <button onclick="addNumber(5)">5</button>
+                <button onclick="addNumber(6)">6</button>
+                <button onclick="addNumber(7)">7</button>
+                <button onclick="addNumber(8)">8</button>
+                <button onclick="addNumber(9)">9</button>
+                <button style="background:#555; box-shadow:0 4px 0 #333" onclick="clearAnswer()">C</button>
+                <button onclick="addNumber(0)">0</button>
+                <button class="btn-check" onclick="checkAnswer()">OK!</button>
+            </div>
+
+            <button class="btn-back" onclick="showMenu()">↩ Torna al Menu</button>
         </div>
     </div>
 
     <script>
-        let currentScore = 0;
-        let highScore = parseInt(localStorage.getItem('tabellineHighScore')) || 0;
-        let num1, num2, correctAnswer;
-        let userAnswer = "";
+        let mode = 'base';
+        let score = 0;
+        let num1, num2, correctAnswer, userAnswer = "";
         let canAnswer = true;
+        let timerInterval;
+        let timeLeft = 10;
 
-        const scoreEl = document.getElementById('score');
-        const highScoreEl = document.getElementById('high-score');
-        const questionEl = document.getElementById('question');
-        const answerSlotEl = document.getElementById('answer-slot');
-        const feedbackEl = document.getElementById('feedback');
+        // Inizializza record
+        const updateRecordsDisplay = () => {
+            document.getElementById('record-base').innerText = localStorage.getItem('rec_base') || 0;
+            document.getElementById('record-pro').innerText = localStorage.getItem('rec_pro') || 0;
+            document.getElementById('record-master').innerText = localStorage.getItem('rec_master') || 0;
+        };
+        updateRecordsDisplay();
 
-        highScoreEl.innerText = highScore;
+        function startGame(selectedMode) {
+            mode = selectedMode;
+            score = 0;
+            document.getElementById('current-score').innerText = "0";
+            document.getElementById('game-level-name').innerText = mode.toUpperCase();
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('timer-box').style.display = (mode === 'master') ? 'block' : 'none';
+            generateQuestion();
+        }
+
+        function showMenu() {
+            clearInterval(timerInterval);
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('game').style.display = 'none';
+            updateRecordsDisplay();
+        }
 
         function generateQuestion() {
+            clearInterval(timerInterval);
             num1 = Math.floor(Math.random() * 10) + 1;
             num2 = Math.floor(Math.random() * 10) + 1;
             correctAnswer = num1 * num2;
             
-            questionEl.innerText = `${num1} × ${num2}`;
+            document.getElementById('question').innerText = `${num1} × ${num2}`;
             userAnswer = "";
-            answerSlotEl.innerText = "";
-            answerSlotEl.style.color = "#2C3E50";
-            feedbackEl.innerText = "Tocca a te!";
-            feedbackEl.className = "feedback";
+            document.getElementById('answer-slot').innerText = "";
+            document.getElementById('answer-slot').style.color = "white";
+            document.getElementById('feedback').innerText = "";
             canAnswer = true;
+
+            if (mode === 'master') startTimer();
         }
 
-        function addNumber(num) {
-            if (!canAnswer) return;
-            if (userAnswer.length < 3) {
-                userAnswer += num;
-                answerSlotEl.innerText = userAnswer;
-            }
+        function startTimer() {
+            timeLeft = 10;
+            const bar = document.getElementById('timer-bar');
+            bar.style.width = "100%";
+            
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                bar.style.width = (timeLeft * 10) + "%";
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleWrongAction("Tempo scaduto!");
+                }
+            }, 100);
+        }
+
+        function addNumber(n) {
+            if (!canAnswer || userAnswer.length >= 3) return;
+            userAnswer += n;
+            document.getElementById('answer-slot').innerText = userAnswer;
         }
 
         function clearAnswer() {
             if (!canAnswer) return;
             userAnswer = "";
-            answerSlotEl.innerText = "";
+            document.getElementById('answer-slot').innerText = "";
         }
 
         function checkAnswer() {
-            if (userAnswer === "" || !canAnswer) return;
+            if (!canAnswer || userAnswer === "") return;
+            clearInterval(timerInterval);
             canAnswer = false;
 
-            // Trasformiamo la stringa dell'utente in un numero vero per il confronto
-            const numericAnswer = parseInt(userAnswer);
-
-            if (numericAnswer === correctAnswer) {
-                currentScore += 10;
-                feedbackEl.innerText = "Ottimo! +10 🌟";
-                answerSlotEl.style.color = "var(--success)";
-                feedbackEl.classList.add("correct");
+            if (parseInt(userAnswer) === correctAnswer) {
+                score += 10;
+                document.getElementById('feedback').innerText = "CORRETTO! 🌟";
+                document.getElementById('feedback').style.color = "var(--success)";
                 
-                if (currentScore > highScore) {
-                    highScore = currentScore;
-                    localStorage.setItem('tabellineHighScore', highScore);
-                    highScoreEl.innerText = highScore;
-                }
+                // Salva record
+                let key = 'rec_' + mode;
+                let currentRec = parseInt(localStorage.getItem(key)) || 0;
+                if (score > currentRec) localStorage.setItem(key, score);
+                
             } else {
-                // MODIFICA: Il punteggio NON torna a 0, semplicemente non aumenta
-                feedbackEl.innerText = `Sbagliato! Era ${correctAnswer}`;
-                feedbackEl.classList.add("wrong");
-                answerSlotEl.innerText = correctAnswer;
-                answerSlotEl.style.color = "var(--error)";
+                handleWrongAction(`SBAGLIATO! Era ${correctAnswer}`);
             }
 
-            scoreEl.innerText = currentScore;
-            
-            setTimeout(generateQuestion, 2000);
+            document.getElementById('current-score').innerText = score;
+            setTimeout(generateQuestion, 1500);
         }
 
+        function handleWrongAction(msg) {
+            canAnswer = false;
+            document.getElementById('feedback').innerText = msg;
+            document.getElementById('feedback').style.color = "var(--error)";
+            document.getElementById('answer-slot').innerText = correctAnswer;
+            document.getElementById('answer-slot').style.color = "var(--error)";
+            
+            if (mode === 'pro' || mode === 'master') {
+                score = Math.max(0, score - 10);
+            }
+            document.getElementById('current-score').innerText = score;
+        }
+
+        // Supporto tastiera
         document.addEventListener('keydown', (e) => {
             if (e.key >= 0 && e.key <= 9) addNumber(e.key);
             if (e.key === "Enter") checkAnswer();
-            if (e.key === "Backspace" || e.key === "Delete") clearAnswer();
+            if (e.key === "Backspace") clearAnswer();
         });
-
-        generateQuestion();
     </script>
 </body>
 </html>
