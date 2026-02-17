@@ -6,12 +6,11 @@
     <title>Sfida delle Tabelline!</title>
     
     <link rel="apple-touch-icon" href="icona.png">
-    
     <link rel="icon" type="image/png" href="icona.png">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tabelline">
+
     <style>
         :root {
             --primary: #4A90E2;
@@ -30,6 +29,7 @@
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
+            touch-action: manipulation; /* Migliora il tocco su mobile */
         }
 
         .game-container {
@@ -57,7 +57,7 @@
             font-size: 3.5rem;
             font-weight: bold;
             color: var(--primary);
-            margin: 30px 0;
+            margin: 25px 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -68,7 +68,7 @@
         .answer-slot {
             color: #2C3E50;
             border-bottom: 5px solid #CBD5E1;
-            min-width: 80px;
+            min-width: 90px;
             height: 4.5rem;
             display: inline-block;
             text-align: center;
@@ -78,11 +78,11 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         button {
-            padding: 18px;
+            padding: 20px;
             font-size: 1.6rem;
             border: none;
             border-radius: 15px;
@@ -90,7 +90,8 @@
             color: #475569;
             cursor: pointer;
             box-shadow: 0 4px 0 #CBD5E1;
-            transition: all 0.1s;
+            transition: all 0.05s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         button:active {
@@ -115,16 +116,17 @@
             font-size: 1.4rem;
             font-weight: bold;
             height: 1.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
 
         .correct { animation: pulse 0.4s ease; color: var(--success); }
+        .wrong { color: var(--error); }
     </style>
 </head>
 <body>
@@ -135,7 +137,7 @@
             <div>Record: <span id="high-score">0</span></div>
         </div>
 
-        <div id="feedback" class="feedback">Inizia la sfida!</div>
+        <div id="feedback" class="feedback">Pronto?</div>
 
         <div class="math-row">
             <span id="question"></span>
@@ -161,7 +163,7 @@
 
     <script>
         let currentScore = 0;
-        let highScore = localStorage.getItem('tabellineHighScore') || 0;
+        let highScore = parseInt(localStorage.getItem('tabellineHighScore')) || 0;
         let num1, num2, correctAnswer;
         let userAnswer = "";
         let canAnswer = true;
@@ -206,9 +208,12 @@
             if (userAnswer === "" || !canAnswer) return;
             canAnswer = false;
 
-            if (parseInt(userAnswer) === correctAnswer) {
+            // Trasformiamo la stringa dell'utente in un numero vero per il confronto
+            const numericAnswer = parseInt(userAnswer);
+
+            if (numericAnswer === correctAnswer) {
                 currentScore += 10;
-                feedbackEl.innerText = "Ottimo! 🌟";
+                feedbackEl.innerText = "Ottimo! +10 🌟";
                 answerSlotEl.style.color = "var(--success)";
                 feedbackEl.classList.add("correct");
                 
@@ -218,28 +223,25 @@
                     highScoreEl.innerText = highScore;
                 }
             } else {
-                currentScore = 0;
-                feedbackEl.innerText = `Ops! Era ${correctAnswer}`;
+                // MODIFICA: Il punteggio NON torna a 0, semplicemente non aumenta
+                feedbackEl.innerText = `Sbagliato! Era ${correctAnswer}`;
+                feedbackEl.classList.add("wrong");
                 answerSlotEl.innerText = correctAnswer;
                 answerSlotEl.style.color = "var(--error)";
             }
 
             scoreEl.innerText = currentScore;
             
-            setTimeout(generateQuestion, 1800);
+            setTimeout(generateQuestion, 2000);
         }
 
         document.addEventListener('keydown', (e) => {
             if (e.key >= 0 && e.key <= 9) addNumber(e.key);
             if (e.key === "Enter") checkAnswer();
-            if (e.key === "Backspace") clearAnswer();
+            if (e.key === "Backspace" || e.key === "Delete") clearAnswer();
         });
 
-        // Avvio immediato della prima domanda reale
         generateQuestion();
     </script>
 </body>
-
 </html>
-
-
