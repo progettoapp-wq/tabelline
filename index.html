@@ -16,7 +16,7 @@
             --success: #4CAF50;
             --error: #FF5252;
             --warning: #FFD700;
-            --bg: #1A1A2E; /* Sfondo scuro spaziale */
+            --bg: #1A1A2E; 
         }
 
         body {
@@ -39,6 +39,7 @@
             text-align: center;
             width: 90%;
             max-width: 450px;
+            position: relative;
         }
 
         /* --- MENU --- */
@@ -60,38 +61,42 @@
 
         /* --- GIOCO --- */
         #game { display: none; }
-        .stats { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; }
+        .stats { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .stats-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; align-items: center;}
         
-        .timer-container {
-            width: 100%;
-            height: 10px;
-            background: #0F3460;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            display: none; /* Attivo solo in Master */
+        #score-wrapper { position: relative; display: inline-block; }
+        #penalty-popup {
+            position: absolute;
+            right: -45px;
+            top: 0;
+            color: var(--error);
+            font-weight: bold;
+            opacity: 0;
+            font-size: 1.2rem;
         }
-        #timer-bar {
-            width: 100%;
-            height: 100%;
-            background: var(--warning);
-            transition: width 0.1s linear;
+        .show-penalty { animation: floatUp 0.8s ease-out; }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-25px); }
         }
 
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .timer-container {
+            width: 100%; height: 10px; background: #0F3460; border-radius: 5px; margin-bottom: 20px; overflow: hidden; display: none;
+        }
+        #timer-bar { width: 100%; height: 100%; background: var(--warning); transition: width 0.1s linear; }
+
         .math-row {
-            font-size: 3.2rem;
-            font-weight: bold;
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            font-size: 3.2rem; font-weight: bold; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        .answer-slot {
-            border-bottom: 5px solid var(--primary);
-            min-width: 80px;
-            min-height: 4rem;
-        }
+        .answer-slot { border-bottom: 5px solid var(--primary); min-width: 80px; min-height: 4rem; display: inline-block; }
 
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         button {
@@ -101,30 +106,27 @@
         }
         button:active { transform: translateY(2px); box-shadow: 0 2px 0 #9d2e41; }
         .btn-check { grid-column: span 2; background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
-        .btn-check:active { box-shadow: 0 2px 0 #2E7D32; }
+        .btn-check:disabled { background: #555; box-shadow: 0 4px 0 #333; opacity: 0.7; }
+        
         .btn-back { background: #533483; margin-top: 20px; width: 100%; padding: 10px; font-size: 1rem; }
-
-        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; }
+        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="main-container">
         <div id="menu">
             <h1 class="menu-title">🚀 Tabelline Stellari</h1>
-            
             <div class="level-card" onclick="startGame('base')">
                 <h3>Livello 1: BASE</h3>
                 <p>Nessun limite, nessun errore.</p>
                 <span class="record-tag">Record: <span id="record-base">0</span></span>
             </div>
-
             <div class="level-card" onclick="startGame('pro')">
                 <h3>Livello 2: PRO</h3>
                 <p>Sbagli? Perdi 10 punti!</p>
                 <span class="record-tag">Record: <span id="record-pro">0</span></span>
             </div>
-
             <div class="level-card" onclick="startGame('master')">
                 <h3>Livello 3: MASTER</h3>
                 <p>10 secondi e penalità errori!</p>
@@ -134,161 +136,5 @@
 
         <div id="game">
             <div class="stats">
-                <div>Punti: <span id="current-score">0</span></div>
-                <div id="game-level-name" style="color:var(--warning)">BASE</div>
-            </div>
-
-            <div class="timer-container" id="timer-box">
-                <div id="timer-bar"></div>
-            </div>
-
-            <div id="feedback" class="feedback"></div>
-
-            <div class="math-row">
-                <span id="question"></span>
-                <span>=</span>
-                <span id="answer-slot" class="answer-slot"></span>
-            </div>
-
-            <div class="keypad">
-                <button onclick="addNumber(1)">1</button>
-                <button onclick="addNumber(2)">2</button>
-                <button onclick="addNumber(3)">3</button>
-                <button onclick="addNumber(4)">4</button>
-                <button onclick="addNumber(5)">5</button>
-                <button onclick="addNumber(6)">6</button>
-                <button onclick="addNumber(7)">7</button>
-                <button onclick="addNumber(8)">8</button>
-                <button onclick="addNumber(9)">9</button>
-                <button style="background:#555; box-shadow:0 4px 0 #333" onclick="clearAnswer()">C</button>
-                <button onclick="addNumber(0)">0</button>
-                <button class="btn-check" onclick="checkAnswer()">OK!</button>
-            </div>
-
-            <button class="btn-back" onclick="showMenu()">↩ Torna al Menu</button>
-        </div>
-    </div>
-
-    <script>
-        let mode = 'base';
-        let score = 0;
-        let num1, num2, correctAnswer, userAnswer = "";
-        let canAnswer = true;
-        let timerInterval;
-        let timeLeft = 10;
-
-        // Inizializza record
-        const updateRecordsDisplay = () => {
-            document.getElementById('record-base').innerText = localStorage.getItem('rec_base') || 0;
-            document.getElementById('record-pro').innerText = localStorage.getItem('rec_pro') || 0;
-            document.getElementById('record-master').innerText = localStorage.getItem('rec_master') || 0;
-        };
-        updateRecordsDisplay();
-
-        function startGame(selectedMode) {
-            mode = selectedMode;
-            score = 0;
-            document.getElementById('current-score').innerText = "0";
-            document.getElementById('game-level-name').innerText = mode.toUpperCase();
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('timer-box').style.display = (mode === 'master') ? 'block' : 'none';
-            generateQuestion();
-        }
-
-        function showMenu() {
-            clearInterval(timerInterval);
-            document.getElementById('menu').style.display = 'block';
-            document.getElementById('game').style.display = 'none';
-            updateRecordsDisplay();
-        }
-
-        function generateQuestion() {
-            clearInterval(timerInterval);
-            num1 = Math.floor(Math.random() * 10) + 1;
-            num2 = Math.floor(Math.random() * 10) + 1;
-            correctAnswer = num1 * num2;
-            
-            document.getElementById('question').innerText = `${num1} × ${num2}`;
-            userAnswer = "";
-            document.getElementById('answer-slot').innerText = "";
-            document.getElementById('answer-slot').style.color = "white";
-            document.getElementById('feedback').innerText = "";
-            canAnswer = true;
-
-            if (mode === 'master') startTimer();
-        }
-
-        function startTimer() {
-            timeLeft = 10;
-            const bar = document.getElementById('timer-bar');
-            bar.style.width = "100%";
-            
-            timerInterval = setInterval(() => {
-                timeLeft -= 0.1;
-                bar.style.width = (timeLeft * 10) + "%";
+                <div class
                 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    handleWrongAction("Tempo scaduto!");
-                }
-            }, 100);
-        }
-
-        function addNumber(n) {
-            if (!canAnswer || userAnswer.length >= 3) return;
-            userAnswer += n;
-            document.getElementById('answer-slot').innerText = userAnswer;
-        }
-
-        function clearAnswer() {
-            if (!canAnswer) return;
-            userAnswer = "";
-            document.getElementById('answer-slot').innerText = "";
-        }
-
-        function checkAnswer() {
-            if (!canAnswer || userAnswer === "") return;
-            clearInterval(timerInterval);
-            canAnswer = false;
-
-            if (parseInt(userAnswer) === correctAnswer) {
-                score += 10;
-                document.getElementById('feedback').innerText = "CORRETTO! 🌟";
-                document.getElementById('feedback').style.color = "var(--success)";
-                
-                // Salva record
-                let key = 'rec_' + mode;
-                let currentRec = parseInt(localStorage.getItem(key)) || 0;
-                if (score > currentRec) localStorage.setItem(key, score);
-                
-            } else {
-                handleWrongAction(`SBAGLIATO! Era ${correctAnswer}`);
-            }
-
-            document.getElementById('current-score').innerText = score;
-            setTimeout(generateQuestion, 1500);
-        }
-
-        function handleWrongAction(msg) {
-            canAnswer = false;
-            document.getElementById('feedback').innerText = msg;
-            document.getElementById('feedback').style.color = "var(--error)";
-            document.getElementById('answer-slot').innerText = correctAnswer;
-            document.getElementById('answer-slot').style.color = "var(--error)";
-            
-            if (mode === 'pro' || mode === 'master') {
-                score = Math.max(0, score - 10);
-            }
-            document.getElementById('current-score').innerText = score;
-        }
-
-        // Supporto tastiera
-        document.addEventListener('keydown', (e) => {
-            if (e.key >= 0 && e.key <= 9) addNumber(e.key);
-            if (e.key === "Enter") checkAnswer();
-            if (e.key === "Backspace") clearAnswer();
-        });
-    </script>
-</body>
-</html>
