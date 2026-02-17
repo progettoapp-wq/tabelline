@@ -29,6 +29,7 @@
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
         .container {
@@ -38,13 +39,13 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             text-align: center;
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
             position: relative;
         }
 
         /* --- MENU --- */
         #menu { display: block; }
-        .menu-title { font-size: 2rem; margin-bottom: 20px; color: var(--warning); }
+        .menu-title { font-size: 1.8rem; margin-bottom: 20px; color: var(--warning); }
         .level-card {
             background: #0F3460;
             margin: 10px 0;
@@ -54,76 +55,94 @@
             transition: 0.2s;
             border: 2px solid transparent;
         }
-        .level-card:hover { border-color: var(--primary); background: #1a4a80; }
-        .level-card h3 { margin: 0; color: var(--primary); }
-        .level-card p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
-        .record-tag { font-size: 0.8rem; font-weight: bold; color: var(--warning); display: block; margin-top: 5px; }
+        .level-card:hover { border-color: var(--primary); }
+        .level-card h3 { margin: 0; color: var(--primary); font-size: 1.2rem; }
+        .level-card p { margin: 5px 0; font-size: 0.85rem; opacity: 0.8; }
+        .record-tag { font-size: 0.8rem; font-weight: bold; color: var(--warning); }
 
-        /* --- SCHERMATA GIOCO --- */
+        /* --- GIOCO --- */
         #game { display: none; }
         
-        /* Layout Statistiche Migliorato */
         .stats-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 0 5px;
+            margin-bottom: 10px;
             font-weight: bold;
+            font-size: 0.9rem;
         }
 
-        .current-level-label { color: var(--primary); font-size: 1rem; }
-        .high-score-label { color: var(--warning); font-size: 1rem; }
+        .current-level-label { color: var(--primary); }
+        .high-score-label { color: var(--warning); }
+        
         .score-display { 
-            font-size: 1.4rem; 
-            margin-bottom: 10px; 
+            font-size: 1.5rem; 
+            margin-bottom: 15px; 
             color: var(--success);
             position: relative;
-            display: inline-block;
+            font-weight: bold;
         }
         
         #penalty-popup {
             position: absolute;
-            right: -50px;
+            right: 20%;
             top: 0;
             color: var(--error);
             font-weight: bold;
             opacity: 0;
             font-size: 1.2rem;
+            pointer-events: none;
         }
         .show-penalty { animation: floatUp 0.8s ease-out; }
 
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-25px); }
+            100% { opacity: 0; transform: translateY(-30px); }
         }
 
         .shake { animation: shake 0.5s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
         }
 
         .timer-container {
-            width: 100%; height: 10px; background: #0F3460; border-radius: 5px; margin-bottom: 20px; overflow: hidden; display: none;
+            width: 100%; height: 8px; background: #0F3460; border-radius: 4px; margin-bottom: 15px; overflow: hidden; display: none;
         }
-        #timer-bar { width: 100%; height: 100%; background: var(--warning); transition: width 0.1s linear; }
+        #timer-bar { width: 100%; height: 100%; background: var(--warning); }
 
         .math-row {
-            font-size: 3.2rem; font-weight: bold; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px;
+            font-size: 3rem; font-weight: bold; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        .answer-slot { border-bottom: 5px solid var(--primary); min-width: 80px; min-height: 4rem; display: inline-block; }
+        .answer-slot { border-bottom: 4px solid var(--primary); min-width: 70px; min-height: 3.5rem; display: inline-block; }
 
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         button {
-            padding: 18px; font-size: 1.5rem; border: none; border-radius: 12px;
+            padding: 15px; font-size: 1.4rem; border: none; border-radius: 12px;
             background: #E94560; color: white; cursor: pointer;
             box-shadow: 0 4px 0 #9d2e41; transition: 0.1s;
+            -webkit-tap-highlight-color: transparent;
         }
         button:active { transform: translateY(2px); box-shadow: 0 2px 0 #9d2e41; }
         .btn-check { grid-column: span 2; background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
         
-        .btn-back { background: #533483; margin-top: 20px; width: 100%; padding: 10px; font-size: 1rem; }
-        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; font-size: 1.2rem
-                   
+        .btn-back { background: #533483; margin-top: 15px; width: 100%; padding: 8px; font-size: 0.9rem; box-shadow: 0 3px 0 #3a245c; }
+        .feedback { height: 1.5rem; margin-bottom: 5px; font-weight: bold; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        <div id="menu">
+            <h1 class="menu-title">🚀 Tabelline Stellari</h1>
+            <div class="level-card" onclick="startGame('base')">
+                <h3>Livello 1: BASE</h3>
+                <p>Nessun limite, nessun errore.</p>
+                <div class="record-tag">Migliore: <span id="record-base">0</span></div>
+            </div>
+            <div class="level-card" onclick="startGame('pro')">
+                <h3>Livello 2: PRO</h3>
+                <p>Sbagli? Perdi 10 punti!</p>
