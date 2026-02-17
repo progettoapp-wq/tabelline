@@ -59,15 +59,32 @@
         .level-card p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
         .record-tag { font-size: 0.8rem; font-weight: bold; color: var(--warning); display: block; margin-top: 5px; }
 
-        /* --- GIOCO --- */
+        /* --- SCHERMATA GIOCO --- */
         #game { display: none; }
-        .stats { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-        .stats-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; align-items: center;}
         
-        #score-wrapper { position: relative; display: inline-block; }
+        /* Layout Statistiche Migliorato */
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+            font-weight: bold;
+        }
+
+        .current-level-label { color: var(--primary); font-size: 1rem; }
+        .high-score-label { color: var(--warning); font-size: 1rem; }
+        .score-display { 
+            font-size: 1.4rem; 
+            margin-bottom: 10px; 
+            color: var(--success);
+            position: relative;
+            display: inline-block;
+        }
+        
         #penalty-popup {
             position: absolute;
-            right: -45px;
+            right: -50px;
             top: 0;
             color: var(--error);
             font-weight: bold;
@@ -106,35 +123,7 @@
         }
         button:active { transform: translateY(2px); box-shadow: 0 2px 0 #9d2e41; }
         .btn-check { grid-column: span 2; background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
-        .btn-check:disabled { background: #555; box-shadow: 0 4px 0 #333; opacity: 0.7; }
         
         .btn-back { background: #533483; margin-top: 20px; width: 100%; padding: 10px; font-size: 1rem; }
-        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; font-size: 1.2rem; }
-    </style>
-</head>
-<body>
-
-    <div class="container" id="main-container">
-        <div id="menu">
-            <h1 class="menu-title">🚀 Tabelline Stellari</h1>
-            <div class="level-card" onclick="startGame('base')">
-                <h3>Livello 1: BASE</h3>
-                <p>Nessun limite, nessun errore.</p>
-                <span class="record-tag">Record: <span id="record-base">0</span></span>
-            </div>
-            <div class="level-card" onclick="startGame('pro')">
-                <h3>Livello 2: PRO</h3>
-                <p>Sbagli? Perdi 10 punti!</p>
-                <span class="record-tag">Record: <span id="record-pro">0</span></span>
-            </div>
-            <div class="level-card" onclick="startGame('master')">
-                <h3>Livello 3: MASTER</h3>
-                <p>10 secondi e penalità errori!</p>
-                <span class="record-tag">Record: <span id="record-master">0</span></span>
-            </div>
-        </div>
-
-        <div id="game">
-            <div class="stats">
-                <div class
-                
+        .feedback { height: 1.5rem; margin-bottom: 10px; font-weight: bold; font-size: 1.2rem
+                   
