@@ -5,144 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tabelline Stellari</title>
     
-    <link rel="apple-touch-icon" href="icona.png">
-    <link rel="icon" type="image/png" href="icona.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <style>
         :root {
-            --primary: #4A90E2;
-            --success: #4CAF50;
-            --error: #FF5252;
-            --warning: #FFD700;
-            --bg: #1A1A2E; 
+            --bg: #1A1A2E;
+            --card: #16213E;
+            --blue: #4A90E2;
+            --red: #FF5252;
+            --green: #4CAF50;
+            --gold: #FFD700;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: sans-serif;
             background-color: var(--bg);
             color: white;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            touch-action: manipulation;
+            height: 100vh;
         }
 
         .container {
-            background: #16213E;
-            padding: 2rem;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            background: var(--card);
+            padding: 20px;
+            border-radius: 20px;
             text-align: center;
             width: 90%;
-            max-width: 400px;
-            position: relative;
+            max-width: 380px;
         }
 
-        /* --- MENU --- */
+        /* MENU */
         #menu { display: block; }
-        .menu-title { font-size: 1.8rem; margin-bottom: 20px; color: var(--warning); }
-        .level-card {
+        .level-btn {
             background: #0F3460;
             margin: 10px 0;
             padding: 15px;
-            border-radius: 15px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
+            border: 1px solid var(--blue);
         }
-        .level-card:hover { border-color: var(--primary); }
-        .level-card h3 { margin: 0; color: var(--primary); font-size: 1.2rem; }
-        .level-card p { margin: 5px 0; font-size: 0.85rem; opacity: 0.8; }
-        .record-tag { font-size: 0.8rem; font-weight: bold; color: var(--warning); }
+        .record-text { font-size: 0.8rem; color: var(--gold); }
 
-        /* --- GIOCO --- */
+        /* GIOCO */
         #game { display: none; }
+        .stats-bar { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
         
-        .stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .current-level-label { color: var(--primary); }
-        .high-score-label { color: var(--warning); }
+        .score-box { font-size: 1.5rem; color: var(--green); margin-bottom: 10px; font-weight: bold; position: relative; }
+        #penalty-popup { color: var(--red); position: absolute; right: 0; opacity: 0; }
         
-        .score-display { 
-            font-size: 1.5rem; 
-            margin-bottom: 15px; 
-            color: var(--success);
-            position: relative;
-            font-weight: bold;
-        }
-        
-        #penalty-popup {
-            position: absolute;
-            right: 20%;
-            top: 0;
-            color: var(--error);
-            font-weight: bold;
-            opacity: 0;
-            font-size: 1.2rem;
-            pointer-events: none;
-        }
-        .show-penalty { animation: floatUp 0.8s ease-out; }
+        .timer-bg { width: 100%; height: 8px; background: #0F3460; border-radius: 4px; margin-bottom: 15px; display: none; }
+        #timer-fill { width: 100%; height: 100%; background: var(--gold); }
 
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-30px); }
-        }
-
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-10px); }
-            40% { transform: translateX(10px); }
-            60% { transform: translateX(-10px); }
-            80% { transform: translateX(10px); }
-        }
-
-        .timer-container {
-            width: 100%; height: 8px; background: #0F3460; border-radius: 4px; margin-bottom: 15px; overflow: hidden; display: none;
-        }
-        #timer-bar { width: 100%; height: 100%; background: var(--warning); }
-
-        .math-row {
-            font-size: 3rem; font-weight: bold; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        .answer-slot { border-bottom: 4px solid var(--primary); min-width: 70px; min-height: 3.5rem; display: inline-block; }
+        .math-text { font-size: 3rem; margin: 20px 0; font-weight: bold; }
+        .ans-slot { border-bottom: 4px solid var(--blue); min-width: 60px; display: inline-block; min-height: 3rem; }
 
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         button {
-            padding: 15px; font-size: 1.4rem; border: none; border-radius: 12px;
-            background: #E94560; color: white; cursor: pointer;
-            box-shadow: 0 4px 0 #9d2e41; transition: 0.1s;
-            -webkit-tap-highlight-color: transparent;
+            padding: 15px; font-size: 1.5rem; background: #E94560; color: white; border: none; border-radius: 10px;
+            box-shadow: 0 4px 0 #9d2e41;
         }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #9d2e41; }
-        .btn-check { grid-column: span 2; background: var(--success); box-shadow: 0 4px 0 #2E7D32; }
+        .btn-ok { grid-column: span 2; background: var(--green); box-shadow: 0 4px 0 #2E7D32; }
+        .btn-c { background: #555; box-shadow: 0 4px 0 #333; }
         
-        .btn-back { background: #533483; margin-top: 15px; width: 100%; padding: 8px; font-size: 0.9rem; box-shadow: 0 3px 0 #3a245c; }
-        .feedback { height: 1.5rem; margin-bottom: 5px; font-weight: bold; font-size: 1.1rem; }
+        .back-btn { margin-top: 20px; background: #533483; font-size: 1rem; padding: 10px; width: 100%; }
+
+        /* ANIMAZIONI */
+        .shake { animation: shakeAnim 0.4s; }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .pop { animation: popAnim 0.7s; }
+        @keyframes popAnim {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-container">
+    <div class="container" id="main-cont">
         <div id="menu">
-            <h1 class="menu-title">🚀 Tabelline Stellari</h1>
-            <div class="level-card" onclick="startGame('base')">
-                <h3>Livello 1: BASE</h3>
-                <p>Nessun limite, nessun errore.</p>
-                <div class="record-tag">Migliore: <span id="record-base">0</span></div>
+            <h2 style="color:var(--gold)">🚀 Tabelline Stellari</h2>
+            <div class="level-btn" onclick="startGame('base')">
+                <b>Livello 1: BASE</b><br>
+                <span class="record-text">Record: <span id="rec-base">0</span></span>
             </div>
-            <div class="level-card" onclick="startGame('pro')">
-                <h3>Livello 2: PRO</h3>
-                <p>Sbagli? Perdi 10 punti!</p>
+            <div class="level-btn" onclick="startGame('pro')">
+                <b>Livello 2: PRO</b><br>
+                <span class="record-text">Record: <span id="rec-pro">0</span></span>
+            </div>
+            <div class="level-btn" onclick="startGame('master')">
+                <b>Livello 3: MASTER</b><br>
+                <span class="record-text">Record: <span id="rec-master">0</span></span>
+            </div>
+        </div>
+
+        <div id="game">
+            <div class="stats-bar">
+                <span id="label-mode" style="color:var(--blue)">BASE</span>
+                <span style="color:var(--gold)">🏆 Migliore: <span id="label-high">0</span></span>
+            </div>
+            
+            <div class="score-box">
+                Punti: <span id="label-score">0</span>
+                <span id="penalty-popup">-10</span>
+            </div>
+
+            <div class="timer-bg" id="timer-box"><div id="timer-fill"></div></div>
+            <div id="feed" style="height:20px; font-weight:bold"></div>
+
+            <div class="math-text">
+                <span id="q-text"></span> = <span class="ans-slot" id="a-text"></span>
+            </div>
+
+            <div class="keypad">
+                <button onclick="press(1)">1</button><button onclick="press(2)">2</button><button onclick="press(3)">3</button>
+                <button onclick="press(4)">4</button><button onclick="press(5)">5</button><button onclick="press(6)">6</button>
+                <button onclick="press(7)">7</button><button onclick="press(8)">8</button><button onclick="press(9)">9</button>
+                <button class="btn-c" onclick="pulire()">C</button><button onclick="press(0)">0</button>
+                <button class="btn-ok" onclick="conferma()">OK!</button>
+            </div>
+            <button class="back-btn" onclick="tornaMenu()">↩ Menu</button>
+        </div>
+    </div>
+
+    <script>
+        var modo = 'base';
+        var punti = 0;
+        var n1, n2, giusta, userAns = "";
+        var attivo = true;
+        var attesa = false;
+        var timer;
+        var tempo = 10;
+
+        function aggiornaRecord() {
+            document.getElementById('rec-base').innerHTML = localStorage.getItem('rb') || 0;
+            document.getElementById('rec-pro').innerHTML = localStorage.getItem('rp') || 0;
+            document.getElementById('rec-master').innerHTML = localStorage.getItem('rm') || 0;
+        }
+
+        function startGame(m) {
+            modo = m;
+            punti = 0;
+            attesa = false;
+            document.getElementById('label-score').innerHTML = "0";
+            document.getElementById('label-mode').innerHTML = m.toUpperCase();
+            
+            var chiave = (m == 'base') ? 'rb' : (m == 'pro' ? 'rp' : 'rm');
+            document.getElementById('label-high').innerHTML = localStorage.getItem(chiave) || 0;
+
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('timer-box').style.display = (m == 'master') ? 'block' : 'none';
+            nuovaDomanda();
+        }
+
+        function tornaMenu() {
+            clearInterval(timer);
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('game').style.display = 'none';
+            aggiornaRecord();
+        }
+
+        function nuovaDomanda() {
+            clearInterval(timer);
+            attesa = false;
+            n1 = Math.floor(Math.random() * 10) + 1;
+            n2 = Math.floor(Math.random() * 10) + 1;
+            giusta = n1 * n2;
+            userAns = "";
+            document.getElementById('q-text').innerHTML = n1 + " × " + n2;
+            document.getElementById('a-text').innerHTML = "";
+            document.getElementById('a-text').style.color = "white";
+            document.getElementById('feed').innerHTML = "";
+            attivo = true;
+            if (modo == 'master') farPartireTimer();
+        }
+
+        function farPartireTimer() {
+            tempo = 10;
+            var bar = document.getElementById('timer-fill');
+            bar.style.width = "100%";
+            timer = setInterval(function() {
+                tempo -= 0.1;
+                bar.style.width = (tempo * 10) + "%";
+                if (tempo <= 0) {
+                    clearInterval(timer);
+                    errore("TEMPO SCADUTO!");
+                }
+            }, 100);
+        }
+
+        function press(n) {
+            if (!attivo || attesa || userAns.length >= 3) return;
+            userAns += n;
+            document.getElementById('a-text').innerHTML = userAns;
+        }
+
+        function pulire() {
+            if (!attivo || attesa) return;
+            userAns = "";
+            document.getElementById('a-text').innerHTML = "";
+        }
+
+        function conferma() {
+            if (attesa) { nuovaDomanda(); return; }
+            if (!attivo || userAns === "") return;
+            
+            clearInterval(timer);
+            attivo = false;
+            
+            if (parseInt(userAns) === giusta) {
+                punti += 10;
+                document.getElementById('feed').innerHTML = "BRAVO! +10";
+                document.getElementById('feed').style.color = "var(--green)";
+                
+                var chiave = (modo == 'base') ? 'rb' : (modo == 'pro' ? 'rp' : 'rm');
+                var recAttuale = parseInt(localStorage.getItem(chiave)) || 0;
+                if (punti > recAttuale) {
+                    localStorage.setItem(chiave, punti);
+                    document.getElementById('label-high').innerHTML = punti;
+                }
+                document.getElementById('label-score').innerHTML = punti;
+                setTimeout(nuovaDomanda, 1200);
+            } else {
+                errore("SBAGLIATO! Era " + giusta);
+            }
+        }
+
+        function errore(msg) {
+            attivo = false;
+            attesa = true;
+            document.getElementById('feed').innerHTML = msg + " [Premi OK]";
+            document.getElementById('feed').style.color = "var(--red)";
+            document.getElementById('a-text').innerHTML = giusta;
+            document.getElementById('a-text').style.color = "var(--red)";
+            
+            if (modo != 'base') {
+                punti = Math.max(0, punti - 10);
+                document.getElementById('label-score').innerHTML = punti;
+                
+                var pop = document.getElementById('penalty-popup');
+                pop.classList.add('pop');
+                document.getElementById('main-cont').classList.add('shake');
+                setTimeout(function() {
+                    pop.classList.remove('pop');
+                    document.getElementById('main-cont').classList.remove('shake');
+                }, 700);
+            }
+        }
+
+        aggiornaRecord();
+    </script>
+</body>
+</html>
